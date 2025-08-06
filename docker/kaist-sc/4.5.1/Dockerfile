@@ -34,10 +34,10 @@ RUN apt-get update && \
     apt-utils \
     vim \
     libhdf5-dev \
-    libncurses5 \
     libssl-dev \
     zlib1g-dev \
     libbz2-dev \
+    libgsl0-dev \
     libreadline-dev \
     libsqlite3-dev \
     wget \
@@ -61,6 +61,6 @@ RUN Rscript -e \
 
 # Install Seurat using pak with binary preference
 RUN Rscript -e \
-  'pak::pkg_install("cran/Seurat@5.2.1", ask=FALSE)'
+  'pak::pkg_install(c("cran/Seurat@5.2.1", "scRepertoire"), ask=FALSE)'
 
 COPY --from=builder ${HOME}/.renku/venv ${HOME}/.renku/venv
