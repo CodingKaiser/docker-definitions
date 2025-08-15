@@ -61,6 +61,15 @@ RUN curl -LO https://github.com/samtools/samtools/releases/download/1.22.1/samto
     make install && \
     mv /tmp/samtools-1.22.1/bin/samtools ${HOME}/bin
 
+RUN curl -LO https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.12.1.zip && \
+    unzip fastqc_v0.12.1.zip && \
+    chmod a+x FastQC/fastqc && \
+    mv FastQC ${HOME}/bin 
+
+RUN curl -LO https://github.com/StevenWingett/FastQ-Screen/archive/refs/tags/v0.16.0.tar.gz && \
+	tar -xzf v0.16.0.tar.gz && \
+	mv FastQ-Screen-0.16.0 ${HOME}/bin 
+
 USER ${NB_USER}
 
 # install the R dependencies
