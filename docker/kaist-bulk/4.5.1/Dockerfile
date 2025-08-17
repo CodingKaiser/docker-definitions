@@ -78,6 +78,13 @@ RUN R -f /tmp/install.R
 
 FROM behaelterkaiser/renkulab-r:4.5.1
 
+USER root
+RUN wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sudo apt-key add - && \
+    echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee /etc/apt/sources.list.d/adoptium.list && \
+    apt update && \
+    apt install -y temurin-21-jdk
+USER ${NB_USER}
+
 COPY --from=builder /usr/local/lib/R/library /usr/local/lib/R/library
 COPY --from=builder /usr/local/lib/R/site-library /usr/local/lib/R/site-library
 COPY --from=builder ${HOME}/.renku/venv ${HOME}/.renku/venv
