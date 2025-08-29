@@ -53,6 +53,7 @@ RUN apt-get update && \
 
 RUN mkdir ${HOME}/bin
 
+## Install samtools
 RUN curl -LO https://github.com/samtools/samtools/releases/download/1.22.1/samtools-1.22.1.tar.bz2 && \
     tar -xjf samtools-1.22.1.tar.bz2 && \
     cd samtools-1.22.1 && \
@@ -61,14 +62,31 @@ RUN curl -LO https://github.com/samtools/samtools/releases/download/1.22.1/samto
     make install && \
     mv /tmp/samtools-1.22.1/bin/samtools ${HOME}/bin
 
+## Install FastQC
 RUN curl -LO https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.12.1.zip && \
     unzip fastqc_v0.12.1.zip && \
     chmod a+x FastQC/fastqc && \
     mv FastQC ${HOME}/bin 
 
+## Install FastqScreen
 RUN curl -LO https://github.com/StevenWingett/FastQ-Screen/archive/refs/tags/v0.16.0.tar.gz && \
 	tar -xzf v0.16.0.tar.gz && \
 	mv FastQ-Screen-0.16.0 ${HOME}/bin 
+
+## Install STAR
+RUN curl https://codeload.github.com/alexdobin/STAR/tar.gz/refs/tags/2.7.11b -o STAR-2.7.11b.tar.gz && \
+	tar -xzf STAR-2.7.11b.tar.gz && \ 
+	mv STAR-2.7.11b/bin/Linux_x86_64/STAR ${HOME}/bin 
+
+## install fastp
+RUN curl -LO http://opengene.org/fastp/fastp && \
+	chmod a+x ./fastp && \
+	mv ./fastp ${HOME}/bin
+
+## install kallisto
+RUN curl -LO https://github.com/pachterlab/kallisto/releases/download/v0.51.1/kallisto_linux-v0.51.1.tar.gz && \
+	tar -xzf kallisto_linux-v0.51.1.tar.gz && \
+	mv kallisto/kallisto ${HOME}/bin
 
 USER ${NB_USER}
 
@@ -90,4 +108,9 @@ COPY --from=builder /usr/local/lib/R/site-library /usr/local/lib/R/site-library
 COPY --from=builder ${HOME}/.renku/venv ${HOME}/.renku/venv
 COPY --from=builder ${HOME}/bin ${HOME}/bin
 
-ENV PATH ${HOME}/bin:$PATH
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN uv pip install --system \
+    multiqc
+
+ENV PATH="${HOME}/bin:$PATH"
+
