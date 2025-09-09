@@ -14,6 +14,8 @@ packages <- c(
   "edgeR",
   "tximport",
   "EnhancedVolcano",
-  "WGCNA"
+  "WGCNA",
+  "ggarchery",
+  "IsoformSwitchAnalyzeR"
 )
 pak::pkg_install(packages, ask=FALSE)

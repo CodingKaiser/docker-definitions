@@ -40,6 +40,7 @@ RUN apt-get update && \
     libgsl0-dev \
     libreadline-dev \
     libsqlite3-dev \
+    libtbb-dev \
     wget \
     curl \
     llvm \
@@ -61,6 +62,6 @@ RUN Rscript -e \
 
 # Install Seurat using pak with binary preference
 RUN Rscript -e \
-  'pak::pkg_install(c("cran/Seurat@5.2.1", "scRepertoire"), ask=FALSE)'
+  'pak::pkg_install(c("cran/Seurat@5.2.1", "scRepertoire", "hdf5r", "enblacar/SCpubr", "clustree", "celldex", "SingleR", "qs2", "dittoSeq", "pheatmap"), ask=FALSE)'
 
 COPY --from=builder ${HOME}/.renku/venv ${HOME}/.renku/venv

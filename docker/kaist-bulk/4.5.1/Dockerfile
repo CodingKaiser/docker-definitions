@@ -51,7 +51,9 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir ${HOME}/bin
+USER ${NB_USER}
+
+RUN mkdir -p ${HOME}/.local/bin
 
 ## Install samtools
 RUN curl -LO https://github.com/samtools/samtools/releases/download/1.22.1/samtools-1.22.1.tar.bz2 && \
@@ -60,35 +62,40 @@ RUN curl -LO https://github.com/samtools/samtools/releases/download/1.22.1/samto
     ./configure --prefix=/tmp/samtools-1.22.1 && \
     make && \ 
     make install && \
-    mv /tmp/samtools-1.22.1/bin/samtools ${HOME}/bin
+    mv /tmp/samtools-1.22.1/bin/samtools ${HOME}/.local/bin
 
 ## Install FastQC
 RUN curl -LO https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.12.1.zip && \
     unzip fastqc_v0.12.1.zip && \
     chmod a+x FastQC/fastqc && \
-    mv FastQC ${HOME}/bin 
+    mv FastQC ${HOME}/.local/bin && \
+    ln -s ${HOME}/.local/bin/FastQC/fastqc ${HOME}/.local/bin/fastqc 
 
 ## Install FastqScreen
 RUN curl -LO https://github.com/StevenWingett/FastQ-Screen/archive/refs/tags/v0.16.0.tar.gz && \
 	tar -xzf v0.16.0.tar.gz && \
-	mv FastQ-Screen-0.16.0 ${HOME}/bin 
+	mv FastQ-Screen-0.16.0 ${HOME}/.local/bin && \
+    ln -s ${HOME}/.local/bin/FastQ-Screen-0.16.0/fastq_screen ${HOME}/.local/bin/fastq_screen
 
 ## Install STAR
 RUN curl https://codeload.github.com/alexdobin/STAR/tar.gz/refs/tags/2.7.11b -o STAR-2.7.11b.tar.gz && \
 	tar -xzf STAR-2.7.11b.tar.gz && \ 
-	mv STAR-2.7.11b/bin/Linux_x86_64/STAR ${HOME}/bin 
+	mv STAR-2.7.11b/bin/Linux_x86_64/STAR ${HOME}/.local/bin 
 
 ## install fastp
 RUN curl -LO http://opengene.org/fastp/fastp && \
 	chmod a+x ./fastp && \
-	mv ./fastp ${HOME}/bin
+	mv ./fastp ${HOME}/.local/bin
 
 ## install kallisto
 RUN curl -LO https://github.com/pachterlab/kallisto/releases/download/v0.51.1/kallisto_linux-v0.51.1.tar.gz && \
 	tar -xzf kallisto_linux-v0.51.1.tar.gz && \
-	mv kallisto/kallisto ${HOME}/bin
+	mv kallisto/kallisto ${HOME}/.local/bin
 
-USER ${NB_USER}
+## install seqkit
+RUN curl -LO https://github.com/shenwei356/seqkit/releases/download/v2.10.1/seqkit_linux_amd64.tar.gz && \
+    tar -xzf seqkit_linux_amd64.tar.gz && \
+    mv seqkit ${HOME}/.local/bin
 
 # install the R dependencies
 COPY install.R /tmp/
@@ -103,14 +110,15 @@ RUN wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | sud
     apt install -y temurin-21-jdk
 USER ${NB_USER}
 
+RUN mkdir ${HOME}/.local/bin
+
 COPY --from=builder /usr/local/lib/R/library /usr/local/lib/R/library
 COPY --from=builder /usr/local/lib/R/site-library /usr/local/lib/R/site-library
 COPY --from=builder ${HOME}/.renku/venv ${HOME}/.renku/venv
-COPY --from=builder ${HOME}/bin ${HOME}/bin
+COPY --from=builder ${HOME}/.local/bin/ ${HOME}/.local/bin/
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 RUN uv pip install --system \
-    multiqc
-
-ENV PATH="${HOME}/bin:$PATH"
+    multiqc \
+    rseqc
 
